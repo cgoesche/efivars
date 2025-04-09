@@ -11,6 +11,7 @@ Description:    List EFI variables made available in RAM from the UEFI NV-RAM
                 defined by the vendors UEFI firmware.
 Author:         Christian Goeschel Ndjomouo <cgoesc2@wgu.edu>
 Date:           Mar 22 2025
+Version:        0.2.0
 """
 
 import os
@@ -39,7 +40,7 @@ def enum_efi_vars(efivarsfs_path: str = SYSFS_EFIVARSFS) -> list:
             list: All found variables in SYSFS_EFIVARSFS
     """
     efi_vars = []
-    for (dirpath, dirnames, filenames) in os.walk(efivarsfs_path):
+    for dirpath, dirnames, filenames in os.walk(efivarsfs_path):
         efi_vars.extend(filenames)
         break
 
@@ -94,7 +95,8 @@ def main() -> None:
     try:
         os.stat(SYSFS_EFIVARSFS)
     except Exception as e:
-        print("""
+        print(
+            """
         {}\n
         EFI variables can not be listed on your system
 
@@ -102,7 +104,8 @@ def main() -> None:
         'noefi' parameter and is configured with 'CONFIG_EFI=y',
         otherwise run the command below as root and try again.
 
-        mount -t efivarfs efivarfs /sys/firmware/efi/efivars""".format(e))
+        mount -t efivarfs efivarfs /sys/firmware/efi/efivars""".format(e)
+        )
         sys.exit(2)
 
     all_efi_vars = enum_efi_vars(SYSFS_EFIVARSFS)
@@ -112,18 +115,15 @@ def main() -> None:
         sys.exit(3)
 
     uefi_spec_vars, vendor_spec_vars = sort_efi_vars(
-        all_efi_vars,
-        UEFI_GLOBAL_VARIABLE_GUID
+        all_efi_vars, UEFI_GLOBAL_VARIABLE_GUID
     )
 
-    print_list(
-        uefi_spec_vars,
-        "[UEFI Specification v2.11 defined EFI variables]"
-    )
+    print_list(uefi_spec_vars,
+               "[UEFI Specification v2.11 defined EFI variables]")
     print("")
     print_list(vendor_spec_vars, "[Vendor defined EFI variables]")
 
 
 # Enter the entrypoint only if this script is ran directly
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
